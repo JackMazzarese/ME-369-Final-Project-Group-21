@@ -10,7 +10,7 @@ from wordcloud import WordCloud
 #loading data
 
 def load_data():
-    raw_data = pl.read_csv('data.csv')
+    raw_data = pl.read_csv('data.csv')  #use file path for downloaded data.csv
     data = raw_data.select(
         pl.col("name"),
         pl.col("reviews.date"),
@@ -362,3 +362,4 @@ def filter_data(
 
 
 #test case
+
