@@ -35,7 +35,7 @@ def word_cloud(df: pl.DataFrame,
         .to_list()
         )
 
-    # If there is no text, return an empty figure (prevents Streamlit warning)
+    #if there is no text return an empty figure so streamlit wont throw error
     if len(texts) == 0:
         return plt.figure()
 
@@ -367,3 +367,4 @@ def filter_data(
             fig_pie = fig
 
     return filtered_df, summary, fig_pie
+
