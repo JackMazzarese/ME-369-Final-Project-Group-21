@@ -7,7 +7,6 @@ import time
 
 from datamonkeys_backend import get_product, word_cloud, rating_distribution, review_timeline, load_data, filter_data
 
-st.set_page_config(page_title="Amazon Review Dashboard", layout="wide")
 st.title("Amazon Review Dashboard")
 
 #loading data
