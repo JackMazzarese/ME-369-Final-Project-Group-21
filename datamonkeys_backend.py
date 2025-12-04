@@ -33,7 +33,7 @@ def word_cloud(df: pl.DataFrame,
         .to_list()
         )
 
-    #if there is no text return an empty figure so streamlit wont throw error
+#if there is no text return an empty figure so streamlit wont throw error
     if len(texts) == 0:
         return plt.figure()
 
@@ -232,12 +232,12 @@ def filter_data(
     if exclude_words:
         lowered = pl.col("_text").str.to_lowercase()
 
-        #build 'or' condition for excluded words
+#build 'or' condition for excluded words
         bad_conditions = [
             lowered.str.contains(word.lower()) for word in exclude_words
             ]
 
-        #combine them, review dropped if any of the listed words appear
+#combine them, review dropped if any of the listed words appear
         data = data.with_columns(
             (pl.any_horizontal(bad_conditions))
             .fill_null(True)
@@ -329,10 +329,10 @@ def filter_data(
         "Filter Reason Counts": filter_reason_counts
     }
 
-#Pie chart of filtering reasons
+#pie chart of filtering reasons
     fig_pie = None
     if num_dropped > 0 and filter_reason_counts:
-        #drop zero count reasons
+#drop zero count reasons
         nonzero = {k: v for k, v in filter_reason_counts.items() if v > 0}
 
         if nonzero:
@@ -365,3 +365,4 @@ def filter_data(
             fig_pie = fig
 
     return filtered_df, summary, fig_pie
+
