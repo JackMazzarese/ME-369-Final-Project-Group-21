@@ -1,6 +1,4 @@
-#instead of using scraper, going to use a dataset from kaggle
-#https://www.kaggle.com/datasets/kritanjalijain/amazon-reviews
-#notes: define functions, then call seperately for filtered and unfiltered data
+#Dataset used for analysis: https://www.kaggle.com/datasets/kritanjalijain/amazon-reviews
 
 #imports
 import polars as pl
@@ -8,7 +6,6 @@ import matplotlib.pyplot as plt
 from wordcloud import WordCloud
 
 #loading data
-
 def load_data():
     raw_data = pl.read_csv('data.csv')  #use file path for downloaded data.csv
     data = raw_data.select(
@@ -22,9 +19,6 @@ def load_data():
     return data
 
 data_for_analysis = load_data()
-
-#for sake of testing with a single item
-#amazon_tap_data = data_for_analysis.filter(pl.col("name") == "Amazon Tap - Alexa-Enabled Portable Bluetooth Speaker")
 
 #function for word cloud creation
 def word_cloud(df: pl.DataFrame,
@@ -48,15 +42,8 @@ def word_cloud(df: pl.DataFrame,
 
     joined_text = " ".join(str(t) for t in texts)
 
-#create list of stopwords using pre existing as well as adding custom stopwords
+#create list of stopwords
     stopwords = set(WordCloud().stopwords)
-    default_extra = {
-    "Amazon", "Kindle"
-    }
-    
-    if extra_stopwords:
-        default_extra |= set(extra_stopwords)
-        stopwords |= default_extra
 
 #create and plot wordcloud
     wc = WordCloud(
@@ -67,12 +54,11 @@ def word_cloud(df: pl.DataFrame,
         max_words=max_words
         ).generate(joined_text)
 
-    fig = plt.figure(figsize=(10, 5))   # added variable
+    fig = plt.figure(figsize=(10, 5))   
     plt.imshow(wc, interpolation="bilinear")
     plt.axis("off")
     plt.tight_layout()
-    return fig                           # replaced plt.show()
-
+    return fig                          
     
     
 #function for rating distribution visualization
@@ -91,14 +77,14 @@ def rating_distribution(df: pl.DataFrame, rating_col: str = "reviews.rating"):
     counts = grouped["n_reviews"].to_list()
 
 #plot bar graph
-    fig = plt.figure()                   # changed
+    fig = plt.figure()              
     plt.bar(ratings, counts, edgecolor="black")
     plt.title("Number of Reviews by Rating")
     plt.xlabel("Rating")
     plt.ylabel("Number of Reviews")
     plt.xticks(ratings)
     plt.tight_layout()
-    return fig                           # changed
+    return fig                           
         
 
 #function for review timeline visualization
@@ -147,14 +133,14 @@ def review_timeline(df: pl.DataFrame,
     avgs = monthly["avg_rating"].to_list()
 
 #plot average rating by month
-    fig = plt.figure()                   # changed
+    fig = plt.figure()               
     plt.plot(months, avgs, marker="o")
     plt.title("Average Review Rating by Month")
     plt.xlabel("Month")
     plt.ylabel("Average Rating")
     plt.xticks(rotation=75)
     plt.tight_layout()
-    return fig                           # changed
+    return fig                         
 
 #function to get product rows where the name matches exactly
 def get_product(df: pl.DataFrame, product_name: str) -> pl.DataFrame:
@@ -165,11 +151,12 @@ def get_product(df: pl.DataFrame, product_name: str) -> pl.DataFrame:
 def filter_data(
     df: pl.DataFrame,
     *,
-    min_rating: float | None = None,
-    max_rating: float | None = None,
-    min_text_length: int | None = None,   # word count
-    start_month: str | None = None,       # 'YYYY-MM'
-    end_month: str | None = None,         # 'YYYY-MM'
+    min_rating: float | None = None,         #minimum star rating, number 1-5
+    max_rating: float | None = None,         #maximum star rating, number 1-5
+    min_text_length: int | None = None,      # word count (integer)
+    start_month: str | None = None,          # 'YYYY-MM'
+    end_month: str | None = None,            # 'YYYY-MM'
+    exclude_words: list[str] | None = None,  #['word 1', 'word 2', ..., 'word n']
     rating_col: str = "reviews.rating",
     text_col: str = "reviews.text",
     date_col: str = "reviews.date",
@@ -243,6 +230,26 @@ def filter_data(
         condition &= ~pl.col("_drop_text_length")
         reason_cols.append("_drop_text_length")
 
+#exclude words filter        
+    if exclude_words:
+        lowered = pl.col("_text").str.to_lowercase()
+
+        #build 'or' condition for excluded words
+        bad_conditions = [
+            lowered.str.contains(word.lower()) for word in exclude_words
+            ]
+
+        #combine them, review dropped if any of the listed words appear
+        data = data.with_columns(
+            (pl.any_horizontal(bad_conditions))
+            .fill_null(True)
+            .alias("_drop_excluded_words")
+            )
+
+        condition &= ~pl.col("_drop_excluded_words")
+        reason_cols.append("_drop_excluded_words")
+
+
 #date/month filters
     if start_month is not None:
         data = data.with_columns(
@@ -304,6 +311,7 @@ def filter_data(
                 "_drop_text_length": "Text Too Short",
                 "_drop_before_start_month": "Before Start Month",
                 "_drop_after_end_month": "After End Month",
+                "_drop_excluded_words": "Contains Excluded Words"
             }.get(c, c)
             filter_reason_counts[nice_name] = counts_row[c][0]
 
@@ -326,7 +334,7 @@ def filter_data(
 #Pie chart of filtering reasons
     fig_pie = None
     if num_dropped > 0 and filter_reason_counts:
-#drop zero count reasons
+        #drop zero count reasons
         nonzero = {k: v for k, v in filter_reason_counts.items() if v > 0}
 
         if nonzero:
@@ -359,7 +367,3 @@ def filter_data(
             fig_pie = fig
 
     return filtered_df, summary, fig_pie
-
-
-#test case
-
