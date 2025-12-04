@@ -40,14 +40,14 @@ if product_name:
             st.session_state.unfiltered_rating = rating_distribution(product_review_data)
             st.session_state.unfiltered_timeline = review_timeline(product_review_data)
             st.session_state.unfiltered_wordcloud = word_cloud(product_review_data)
-        
+         
 #creating sidebar filters
         st.sidebar.header("Filters")
         min_words = st.sidebar.slider("Min Word Count", 0, 100, 10)
         selected_stars = st.sidebar.multiselect("Star Ratings", [1,2,3,4,5], [1,2,3,4,5])
         time_period = st.sidebar.selectbox("Time Period", ["All time", "Last 6 months", "Last year"])
         excluded_words_user_input = st.sidebar.text_input("Exclude words... (separated by a comma)", "")
-        exclude_words_list = [word.strip() for word in excluded_words_user_input.split(",") if word.strip()]
+        excluded_words_list = [word.strip() for word in excluded_words_user_input.split(",") if word.strip()]
 
         apply_filters = st.sidebar.button("Apply Filters")
         
@@ -63,24 +63,24 @@ if product_name:
             end_month = None
             if time_period == "Last 6 months":
                 start_month = "2016-06"
-                end_month = "2016-12"
+                end_month ="2016-12"
             elif time_period == "Last year":
-                start_month = "2016-01"
-                end_month = "2017-01"
+                start_month ="2016-01"
+                end_month ="2017-01"
             
 #rating filter
             min_rating = min(selected_stars) if selected_stars else None
             max_rating = max(selected_stars) if selected_stars else None
             
 #calling backend function to filter reviews
-            filtered_data, all_data, pie_chart = filter_data(
+            filtered_data, all_data, pie_chart=filter_data(
                 product_review_data,
-                min_rating=min_rating,
-                max_rating=max_rating,
-                min_text_length=min_words,
-                start_month=start_month,
-                end_month=end_month,
-                exclude_words=exclude_words_list if exclude_words_list else None 
+                min_rating = min_rating,
+                max_rating = max_rating,
+                min_text_length = min_words,
+                start_month = start_month,
+                end_month = end_month,
+                exclude_words = excluded_words_list if excluded_words_list else None 
             )
 
 #creating filtered and unfiltered tabs
