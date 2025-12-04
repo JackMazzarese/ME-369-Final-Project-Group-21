@@ -73,7 +73,7 @@ if product_name:
             max_rating = max(selected_stars) if selected_stars else None
             
 #calling backend function to filter reviews
-            filtered_data, all_data, pie_chart=filter_data(
+            filtered_data, all_data, pie_chart = filter_data(
                 product_review_data,
                 min_rating = min_rating,
                 max_rating = max_rating,
