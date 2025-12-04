@@ -1,5 +1,3 @@
-#Dataset used for analysis: https://www.kaggle.com/datasets/kritanjalijain/amazon-reviews
-
 #imports
 import polars as pl
 import matplotlib.pyplot as plt
@@ -367,4 +365,3 @@ def filter_data(
             fig_pie = fig
 
     return filtered_df, summary, fig_pie
-
