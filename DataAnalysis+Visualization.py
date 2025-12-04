@@ -19,7 +19,7 @@ data_for_analysis = raw_data.select(
 )
 
 #for sake of testing with a single item
-kindle_paperwhite_data = data_for_analysis.filter(pl.col("name") == "Kindle Paperwhite")
+amazon_tap_data = data_for_analysis.filter(pl.col("name") == "Amazon Tap - Alexa-Enabled Portable Bluetooth Speaker")
 
 #function for word cloud creation
 def word_cloud(df: pl.DataFrame,
@@ -150,3 +150,7 @@ def filter_data('raw data', parameters*)
 #bulk of filtering and cleaning code
 #output filtered data set, total number of reviews, average rating, and percent filtered
 #keep a count of the reasons for filtering
+
+word_cloud(amazon_tap_data)
+rating_distribution(amazon_tap_data)
+review_timeline(amazon_tap_data)
