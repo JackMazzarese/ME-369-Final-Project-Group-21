@@ -1,8 +1,11 @@
 
 #imports
 import streamlit as st
+
 import polars as pl
+
 import matplotlib.pyplot as plt
+
 import time
 
 from datamonkeys_backend import get_product, word_cloud, rating_distribution, review_timeline, load_data, filter_data
@@ -35,28 +38,31 @@ if product_name:
     else:
         st.success(f"Loaded {product_review_data.height} reviews")
         
-        #generating unfiltered graphs and storing unaffected versions (meaning filters will not affect them)
+#generating unfiltered graphs and storing unaffected versions (meaning filters will not affect them)
         if 'most_recent_product' not in st.session_state or st.session_state.most_recent_product != product_name:
             st.session_state.most_recent_product = product_name
             st.session_state.unfiltered_rating = rating_distribution(product_review_data)
             st.session_state.unfiltered_timeline = review_timeline(product_review_data)
             st.session_state.unfiltered_wordcloud = word_cloud(product_review_data)
         
-        #creating sidebar filters
+#creating sidebar filters
         st.sidebar.header("Filters")
         min_words = st.sidebar.slider("Min Word Count", 0, 100, 10)
         selected_stars = st.sidebar.multiselect("Star Ratings", [1,2,3,4,5], [1,2,3,4,5])
         time_period = st.sidebar.selectbox("Time Period", ["All time", "Last 6 months", "Last year"])
-        
+        excluded_words_user_input = st.sidebar.text_input("Exclude words... (separated by a comma)", "")
+        exclude_words_list = [word.strip() for word in excluded_words_user_input.split(",") if word.strip()]
+
         apply_filters = st.sidebar.button("Apply Filters")
         
-        #applying filters
+#applying filters
         filtered_data = None
         all_data = None
-        fig_pie = None
+        pie_chart = None
         
-        #date filter
-        if apply_filters: #acts as if the current year is 2017 because of our limited dataset
+#date filter
+#acts as if the current year is 2017 because of our limited dataset
+        if apply_filters: 
             start_month = None
             end_month = None
             if time_period == "Last 6 months":
@@ -66,24 +72,25 @@ if product_name:
                 start_month = "2016-01"
                 end_month = "2017-01"
             
-            #rating filter
+#rating filter
             min_rating = min(selected_stars) if selected_stars else None
             max_rating = max(selected_stars) if selected_stars else None
             
-            #calling backend function to filter reviews
-            filtered_data, all_data, fig_pie = filter_data(
+#calling backend function to filter reviews
+            filtered_data, all_data, pie_chart = filter_data(
                 product_review_data,
                 min_rating=min_rating,
                 max_rating=max_rating,
                 min_text_length=min_words,
                 start_month=start_month,
-                end_month=end_month
+                end_month=end_month,
+                exclude_words=exclude_words_list if exclude_words_list else None 
             )
 
-        #creating filtered and unfiltered tabs
+#creating filtered and unfiltered tabs
         unfiltered_tab, filtered_tab = st.tabs(["Unfiltered Reviews", "Filtered Reviews"])
         
-        #unfiltered tab
+#unfiltered tab
         with unfiltered_tab:
             st.subheader("Unfiltered Reviews")
             left_side_column, right_side_column = st.columns(2)
@@ -93,7 +100,7 @@ if product_name:
                 st.pyplot(st.session_state.unfiltered_timeline)
             st.pyplot(st.session_state.unfiltered_wordcloud)
         
-        #filtered tab
+#filtered tab
         with filtered_tab:
             st.subheader("Filtered Reviews")
             if filtered_data is None:
@@ -101,21 +108,21 @@ if product_name:
             else:
                 left_side_column, right_side_column = st.columns(2)
                 with left_side_column:
-                    fig = rating_distribution(filtered_data)
-                    st.pyplot(fig)
-                    plt.close(fig)
+                    chart = rating_distribution(filtered_data)
+                    st.pyplot(chart)
+                    plt.close(chart)
                 with right_side_column:
-                    fig = review_timeline(filtered_data)
-                    st.pyplot(fig)
-                    plt.close(fig)
+                    chart = review_timeline(filtered_data)
+                    st.pyplot(chart)
+                    plt.close(chart)
                 
-                fig = word_cloud(filtered_data)
-                st.pyplot(fig)
-                plt.close(fig)
+                chart = word_cloud(filtered_data)
+                st.pyplot(chart)
+                plt.close(chart)
                 
-                if fig_pie:
-                    st.pyplot(fig_pie)
-                    plt.close(fig_pie)
+                if pie_chart:
+                    st.pyplot(pie_chart)
+                    plt.close(pie_chart)
                     
                 #displays all_data dict below pie chart just to see analyzed data
                 if all_data:
