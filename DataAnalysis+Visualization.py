@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from wordcloud import WordCloud
 
 #loading data
-raw_data = pl.read_csv('C:/Users/jack/Desktop/School Stuff/Programming Applications for Engineering/Final Project/data.csv')
+raw_data = pl.read_csv('file path for data.csv')   #use file path for downloaded data.csv
 data_for_analysis = raw_data.select(
     pl.col("name"),
     pl.col("reviews.date"),
@@ -349,3 +349,4 @@ word_cloud(filtered_tap)
 rating_distribution(filtered_tap)
 review_timeline(filtered_tap)
 print(tap_summary)
+
