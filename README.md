@@ -10,17 +10,10 @@ How to Run:
 
 The dashboard expects the file named data.csv in the same folder.
 
-1. Install dependencies
-      pip install streamlit polars matplotlib wordcloud
+1. Install dependencies by running "pip install streamlit polars matplotlib wordcloud" in your terminal
 
-2. Make sure your project folder looks like:
-      /project-folder
-          streamlit_app.py
-          datamonkeys_backend.py
-          data.csv
+2. Make sure your project folder looks like: (project-folder) --> streamlit_app.py, datamonkeys_backend.py, data.csv, datamonkeys_frontend.py
 
-3. Start Streamlit
-      From inside your project directory:
-      streamlit run streamlit_app.py
+4. Start Streamlit from inside your project directory. Run "streamlit run streamlit_app.py" in your Terminal. 
 
 This will open a tab in your browser with the dashboard.
